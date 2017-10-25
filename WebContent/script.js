@@ -1,44 +1,86 @@
-'use strict';
-// Declare (or Register, Create) an Angular module.
-var app = angular.module('myApp', ['ngRoute']);
+ var app = angular.module('myApp',['ngRoute','ngCookies']);
 
-// ---------- Config route(s). ----------
-// Inject $routeProvider dependency for routing.
-app.config(['$routeProvider', function($routeProvider) {
-  // Home 
-  $routeProvider.when('/', {
-    templateUrl: 'home.html',
-    controller: 'HomeController'
-  });
-  // Food
-  $routeProvider.when('/register', {
-    templateUrl: 'register.html',
-    controller: 'RegisterController'
-  });
-  // Drinks
-  $routeProvider.when('/signup', {
-    templateUrl: 'signup.html',
-    controller: 'SignupController'
-  });
-  // Otherwise, redirect to Home
-  $routeProvider.otherwise({redirectTo: '/'});
-}]);
 
-// ---------- Create Controller(s). ----------
-// HomeCotnroller
-app.controller('HomeController', ['$scope', function($scope){
-  // Bind "message" to display to html pages
-  $scope.message = 'Welcome to CSS DNA SPA Demo!';
-}]);
+app.config(function($routeProvider,$locationProvider){
+	
+	$routeProvider
+	.when('/registration',{
+		templateUrl:'views/registrationform.html',
+		controller:'UserController'
+	})
+	.when('/login',{
+		templateUrl:'views/login.html',
+		controller:'UserController'
+	})
+	.when('/savejob',{
+		templateUrl:'views/jobform.html',
+		controller:'JobController'
+	})
+	.when('/getalljobs',{
+		templateUrl:'views/jobtitle.html',
+		controller:'JobController'
+	})
+	.when('/saveblogpost',{
+		templateUrl:'views/blogpostform.html',
+		controller:'BlogPostController'
+	})
+	.when('/getallblogs',{
+		templateUrl:'views/blogslist.html',
+		controller:'BlogPostController'
+	})
+	.when('/getBlogForApproval/:id',{
+		templateUrl:'views/approvalform.html',
+		controller:'BlogDetailController'
+	})
+	.when('/getBlogDetail/:id',{
+		templateUrl:'views/blogdetail.html',
+		controller:'BlogDetailController'
+	})
+	.when('/suggestedusers',{
+		templateUrl:'views/suggesteduser.html',
+		controller:'FriendController'
+	})
+	.when('/pendingrequests',{
+		templateUrl:'views/pendingrequests.html',
+		controller:'FriendController'
+	})
+	.when('/listoffriends',{
+		templateUrl:'views/listoffriends.html',
+		controller:'FriendController'
+	})
+	.when('/profilepic',{
+		templateUrl:'views/profilepic.html'
+	})
+	.when('/edituserprofile',{
+		templateUrl:'views/updateprofile.html',
+		controller:'UserController'
+	})
+	.when('/chat',{
+		templateUrl:'views/chat.html',
+		controller:'ChatCtrl'
+	})
 
-// FoodCotnroller
-app.controller('RegisterController', ['$scope', function($scope){
-  // Bind "message" to display to html pages
-  $scope.message = 'This is Food page.';
-}]);
-
-// DrinksCotnroller
-app.controller('SignupController', ['$scope', function($scope){
-  // Bind "message" to display to html pages
-  $scope.message = 'This is Drinks page.';
-}]);
+	.otherwise({
+		templateUrl:'views/home.html'
+	})
+})
+app.run(function($rootScope,$location,UserService,$cookieStore){
+	if($rootScope.currentUser==undefined)
+		$rootScope.currentUser=$cookieStore.get("currentUser")
+		
+		$rootScope.logout=function()
+		{
+		UserService.logout().then(function(response)
+				{
+			$rootScope.message="Loggedout Successfully..."
+				delete $rootScope.currentUser
+				$cookieStore.remove("currentUser")
+				$location.path('/login')
+				},function(response)
+				{
+					console.log(response.status)
+					$rootScope.message=response.data.message
+					$location.path('/login')
+				})
+	}
+})
